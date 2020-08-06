@@ -7,6 +7,7 @@ const multer = require("multer");
 const Profile = require("../../Model/Profile");
 //Load multer
 const { storage } = require("../../config/multer");
+const { update } = require("../../Model/Profile");
 const upload = multer({ storage });
 
 //@ http method GET
@@ -39,6 +40,17 @@ router.get("/user-details/:id", (req, res) => {
     })
     .catch((err) => console.log(err));
 });
+/*========================GET EDIT ROUTE BY ID =============================*/
+router.get("/edit-profile/:id", (req, res) => {
+  Profile.findOne({ _id: req.params.id })
+    .lean()
+    .then((editProfile) => {
+      res.render("./profiles/edit-profile", { editProfile });
+    })
+    .catch((err) => console.log(err));
+});
+
+/*========================Close GET EDIT ROUTE BY ID =============================*/
 
 // @http method POST
 // @description CREATE PROFILE DATA
@@ -77,6 +89,45 @@ router.post("/create-profile", upload.single("photo"), (req, res) => {
     .save()
     .then((profile) => {
       res.redirect("/profile/all-profiles", 201, { profile });
+    })
+    .catch((err) => console.log(err));
+});
+
+/*==================================USE HTTP PUT METHOD FOR UPDATE OR MODIFY DATA ==========*/
+router.put("/edit-profile/:id", upload.single("photo"), (req, res) => {
+  // first find existing data and update data
+  Profile.findOne({ _id: req.params.id })
+    .then((updateProfile) => {
+      //old                  //new
+      updateProfile.photo = req.file;
+      updateProfile.firstname = req.body.firstname;
+      updateProfile.lastname = req.body.lastname;
+      updateProfile.designation = req.body.designation;
+      updateProfile.phone = req.body.phone;
+      updateProfile.address = req.body.address;
+      updateProfile.alt_address = req.body.alt_address;
+      updateProfile.skills = req.body.skills;
+      updateProfile.gender = req.body.gender;
+      updateProfile.country = req.body.country;
+      updateProfile.pincode = req.body.pincode;
+      updateProfile.landmark = req.body.landmark;
+
+      //save new values in to database
+      updateProfile
+        .save()
+        .then((update) => {
+          res.redirect("/profile/all-profiles", 201, { update });
+        })
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => console.log(err));
+});
+
+/*===============================HTTP DELETE METHOD FOR DELETING DATA ========================*/
+router.delete("/profile-delete/:id", (req, res) => {
+  Profile.deleteOne({ _id: req.params.id })
+    .then(() => {
+      res.redirect("/profile/all-profiles", 201);
     })
     .catch((err) => console.log(err));
 });
