@@ -3,7 +3,7 @@
 
         <div class="card-body card">
             <h1 class="h4 display-5 font-weight-bold text-uppercase">Create account</h1>
-            <form>
+            <form method="POST" action="/auth/register" novalidate>
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required />

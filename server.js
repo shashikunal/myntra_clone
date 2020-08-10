@@ -15,7 +15,7 @@ const app = express();
 
 connect(
   MONGODB_URL,
-  { useNewUrlParser: true, useUnifiedTopology: true },
+  { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true },
   (err) => {
     if (err) throw err;
     console.log("successfully connected to database");
