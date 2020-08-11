@@ -43,21 +43,26 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto "
           style="margin-left: 18px !important; margin-top:5px !important; font-weight:700;font-size:15px">
+
+          {{#if user}}
           <li class="nav-item" style="color: black;">
             <a class="nav-link" href="/profile/create-profile">Add profile</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/profile/all-profiles">Profiles</a>
           </li>
-          {{!-- <li class="nav-item">
-            <a class="nav-link" href="#">Bag</a>
-          </li> --}}
+          <li class="nav-item">
+            <a class="nav-link  btn btn-dark text-white" href="/auth/logout">logout</a>
+          </li>
+          {{else}}
+
           <li class="nav-item">
             <a class="nav-link" href="/auth/login">Login</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/auth/register">Register</a>
           </li>
+          {{/if}}
 
         </ul>
       </div>

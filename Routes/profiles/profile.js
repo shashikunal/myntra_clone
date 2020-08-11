@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 
+const { ensureAuthenticated } = require("../../helper/auth_helper");
+
 //Load Schema
 const Profile = require("../../Model/Profile");
 //Load multer
@@ -17,7 +19,7 @@ router.get("/", (req, res) => {
   res.send("i am profile router");
 });
 
-router.get("/create-profile", (req, res) => {
+router.get("/create-profile", ensureAuthenticated, (req, res) => {
   res.render("./profiles/create-profile");
 });
 router.get("/all-profiles", (req, res) => {
@@ -41,7 +43,7 @@ router.get("/user-details/:id", (req, res) => {
     .catch((err) => console.log(err));
 });
 /*========================GET EDIT ROUTE BY ID =============================*/
-router.get("/edit-profile/:id", (req, res) => {
+router.get("/edit-profile/:id", ensureAuthenticated, (req, res) => {
   Profile.findOne({ _id: req.params.id })
     .lean()
     .then((editProfile) => {
@@ -56,77 +58,87 @@ router.get("/edit-profile/:id", (req, res) => {
 // @description CREATE PROFILE DATA
 // @access PRIVATE
 
-router.post("/create-profile", upload.single("photo"), (req, res) => {
-  let {
-    firstname,
-    lastname,
-    designation,
-    phone,
-    skills,
-    address,
-    alt_address,
-    gender,
-    country,
-    pincode,
-    landmark,
-  } = req.body;
-  let newProfile = {
-    photo: req.file,
-    firstname,
-    lastname,
-    phone,
-    designation,
-    skills,
-    address,
-    alt_address,
-    gender,
-    country,
-    pincode,
-    landmark,
-  };
+router.post(
+  "/create-profile",
+  ensureAuthenticated,
+  upload.single("photo"),
+  (req, res) => {
+    let {
+      firstname,
+      lastname,
+      designation,
+      phone,
+      skills,
+      address,
+      alt_address,
+      gender,
+      country,
+      pincode,
+      landmark,
+    } = req.body;
+    let newProfile = {
+      photo: req.file,
+      firstname,
+      lastname,
+      phone,
+      designation,
+      skills,
+      address,
+      alt_address,
+      gender,
+      country,
+      pincode,
+      landmark,
+    };
 
-  new Profile(newProfile)
-    .save()
-    .then((profile) => {
-       req.flash("success_msg", "successfully profile created");
-      res.redirect("/profile/all-profiles", 201, { profile });
-    })
-    .catch((err) => console.log(err));
-});
+    new Profile(newProfile)
+      .save()
+      .then((profile) => {
+        req.flash("success_msg", "successfully profile created");
+        res.redirect("/profile/all-profiles", 201, { profile });
+      })
+      .catch((err) => console.log(err));
+  }
+);
 
 /*==================================USE HTTP PUT METHOD FOR UPDATE OR MODIFY DATA ==========*/
-router.put("/edit-profile/:id", upload.single("photo"), (req, res) => {
-  // first find existing data and update data
-  Profile.findOne({ _id: req.params.id })
-    .then((updateProfile) => {
-      //old                  //new
-      updateProfile.photo = req.file;
-      updateProfile.firstname = req.body.firstname;
-      updateProfile.lastname = req.body.lastname;
-      updateProfile.designation = req.body.designation;
-      updateProfile.phone = req.body.phone;
-      updateProfile.address = req.body.address;
-      updateProfile.alt_address = req.body.alt_address;
-      updateProfile.skills = req.body.skills;
-      updateProfile.gender = req.body.gender;
-      updateProfile.country = req.body.country;
-      updateProfile.pincode = req.body.pincode;
-      updateProfile.landmark = req.body.landmark;
+router.put(
+  "/edit-profile/:id",
+  ensureAuthenticated,
+  upload.single("photo"),
+  (req, res) => {
+    // first find existing data and update data
+    Profile.findOne({ _id: req.params.id })
+      .then((updateProfile) => {
+        //old                  //new
+        updateProfile.photo = req.file;
+        updateProfile.firstname = req.body.firstname;
+        updateProfile.lastname = req.body.lastname;
+        updateProfile.designation = req.body.designation;
+        updateProfile.phone = req.body.phone;
+        updateProfile.address = req.body.address;
+        updateProfile.alt_address = req.body.alt_address;
+        updateProfile.skills = req.body.skills;
+        updateProfile.gender = req.body.gender;
+        updateProfile.country = req.body.country;
+        updateProfile.pincode = req.body.pincode;
+        updateProfile.landmark = req.body.landmark;
 
-      //save new values in to database
-      updateProfile
-        .save()
-        .then((update) => {
-          req.flash("success_msg", "successfully profile Updated");
-          res.redirect("/profile/all-profiles", 201, { update });
-        })
-        .catch((err) => console.log(err));
-    })
-    .catch((err) => console.log(err));
-});
+        //save new values in to database
+        updateProfile
+          .save()
+          .then((update) => {
+            req.flash("success_msg", "successfully profile Updated");
+            res.redirect("/profile/all-profiles", 201, { update });
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  }
+);
 
 /*===============================HTTP DELETE METHOD FOR DELETING DATA ========================*/
-router.delete("/profile-delete/:id", (req, res) => {
+router.delete("/profile-delete/:id", ensureAuthenticated, (req, res) => {
   Profile.deleteOne({ _id: req.params.id })
     .then(() => {
       req.flash("success_msg", "successfully profile deleted");

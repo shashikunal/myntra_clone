@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const passport = require("passport");
 
 //loading Auth Model
 const User = require("../../Model/Auth");
@@ -24,6 +25,14 @@ router.get("/register", (req, res) => {
 //@description its AUTH get information
 //@access PUBLIC
 /*=======================LOGIN POST ROUTE =========================*/
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", {
+    successRedirect: "/profile/all-profiles",
+    failureRedirect: "/auth/login",
+    failureFlash: true,
+  })(req, res, next);
+});
+
 /*=======================REGISTER POST ROUTE =========================*/
 router.post("/register", (req, res) => {
   //SERVER SIDE VALIDATION
@@ -65,17 +74,25 @@ router.post("/register", (req, res) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
               if (err) throw err;
               newUser.password = hash;
-              newUser.save().then(userData => {
-                req.flash('success_msg', 'Successfully User Registered');
-                res.redirect("/auth/login", 201, { userData });
-              }).catch(err => console.log(err))
+              newUser
+                .save()
+                .then((userData) => {
+                  req.flash("success_msg", "Successfully User Registered");
+                  res.redirect("/auth/login", 201, { userData });
+                })
+                .catch((err) => console.log(err));
             });
           }); //done hashing and save in to database
-
         }
       })
       .catch((err) => console.log(err));
   }
 });
 
+/*===================logout GET ROUTE ===================*/
+router.get("/logout", (req, res) => {
+  req.logout();
+  req.flash("success_msg", "Successfully logged out");
+  res.redirect("/auth/login", 201, {});
+});
 module.exports = router;

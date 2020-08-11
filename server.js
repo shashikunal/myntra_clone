@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const Handlebars = require("handlebars");
 const methodOverride = require("method-override");
+const passport = require("passport");
 const session = require("express-session");
 const flash = require("connect-flash");
 
@@ -10,6 +11,9 @@ const { connect } = require("mongoose");
 const { PORT, MONGODB_URL } = require("./config");
 
 const app = express();
+
+//import local-passport to server
+require("./config/passport")(passport);
 
 /*---database connecting----*/
 
@@ -52,6 +56,12 @@ app.use(
 );
 app.use(flash());
 
+/*========PASSPORT MIDDLEWARE HERE==================*/
+app.use(passport.initialize());
+app.use(passport.session());
+
+/*========PASSPORT MIDDLEWARE ENDS HERE==================*/
+
 /*==================session and connect flass middlewares are ended here ======*/
 /*==================SET GLOBAL VARIABLES THIS VARIABLE CAN ACCESS ENTIRE YOUR APPLICATIONS =======*/
 app.use(function (req, res, next) {
@@ -59,7 +69,7 @@ app.use(function (req, res, next) {
   res.locals.errors_msg = req.flash("errors_msg");
   res.locals.warnings_msg = req.flash("warnings_msg ");
   res.locals.error = req.flash("error");
-
+  res.locals.user = req.user || null;
   next();
 });
 
